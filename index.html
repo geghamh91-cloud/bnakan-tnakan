@@ -4,9 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Bnakan Tnakan | Домашняя кухня Ереван</title>
-  <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -47,7 +45,7 @@
       </button>
     </div>
 
-    <!-- Баннер с условием бесплатной доставки -->
+    <!-- Баннер бесплатной доставки -->
     <div class="max-w-md mx-auto mt-2 bg-[#EFE6DD] border border-[#D5C7BC] rounded-xl px-3 py-1.5 flex items-center justify-between text-xs">
       <div class="flex items-center space-x-2 text-[#3C2A21]">
         <i class="fa-solid fa-truck-fast text-[#3F5E4D]"></i>
@@ -64,16 +62,16 @@
       </div>
     </div>
 
-    <!-- Категории (скролл) -->
+    <!-- Категории -->
     <div class="max-w-md mx-auto flex space-x-2 mt-2 overflow-x-auto hide-scrollbar py-1" id="categoryTabs"></div>
   </header>
 
-  <!-- Список блюд -->
+  <!-- Список позиций -->
   <main class="max-w-md mx-auto px-4 mt-3">
     <div id="menuContainer" class="space-y-6"></div>
   </main>
 
-  <!-- Модальное окно корзины / оформления -->
+  <!-- Модальное окно корзины -->
   <div id="cartModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex flex-col justify-end">
     <div class="bg-[#FDFBF7] rounded-t-3xl max-h-[90vh] flex flex-col max-w-md mx-auto w-full shadow-2xl border-t border-[#D5C7BC]">
       <div class="p-4 border-b border-[#E8DFD8] flex items-center justify-between">
@@ -87,7 +85,7 @@
       </div>
 
       <div class="overflow-y-auto p-4 space-y-4 flex-1" id="cartContent">
-        <!-- Прогресс-бар бесплатной доставки -->
+        <!-- Полоса бесплатной доставки -->
         <div id="deliveryProgressBox" class="bg-[#F5EFEB] border border-[#E3D7CD] rounded-2xl p-3">
           <div class="flex justify-between items-center text-xs mb-1.5">
             <span id="deliveryProgressText" class="font-medium text-[#3C2A21]">До бесплатной доставки: 15 000 ֏</span>
@@ -100,7 +98,7 @@
 
         <div id="cartItemsList" class="space-y-2.5"></div>
 
-        <!-- Детали доставки -->
+        <!-- Данные получателя -->
         <div class="bg-[#F5EFEB] p-3.5 rounded-2xl border border-[#E3D7CD] space-y-3 mt-4">
           <h3 class="text-xs font-bold uppercase tracking-wider text-[#7A6B63]">Детали доставки (Ереван)</h3>
           
@@ -128,7 +126,7 @@
         <div class="bg-[#EFE6DD] p-3.5 rounded-2xl space-y-1">
           <div class="flex justify-between items-center text-xs text-[#7A6B63]">
             <span>Доставка по Еревану:</span>
-            <span id="deliveryCostLabel" class="font-bold text-[#3C2A21]">По тарифу такси/доставки</span>
+            <span id="deliveryCostLabel" class="font-bold text-[#3C2A21]">По тарифу службы доставки</span>
           </div>
           <div class="flex justify-between items-center text-sm font-semibold pt-1 border-t border-[#D5C7BC]/50">
             <span>Итого блюд на сумму:</span>
@@ -138,9 +136,9 @@
       </div>
 
       <div class="p-4 border-t border-[#E8DFD8]">
-        <button onclick="submitOrder()" class="w-full bg-[#3F5E4D] hover:bg-[#344E40] text-white py-3.5 rounded-2xl font-bold flex items-center justify-center space-x-2 shadow-lg transition active:scale-[0.98]">
+        <button id="submitBtn" onclick="submitOrder()" class="w-full bg-[#3F5E4D] hover:bg-[#344E40] text-white py-3.5 rounded-2xl font-bold flex items-center justify-center space-x-2 shadow-lg transition active:scale-[0.98]">
           <i class="fa-paper-plane fa-solid"></i>
-          <span>Оформить заказ</span>
+          <span id="btnText">Оформить заказ</span>
         </button>
       </div>
     </div>
@@ -395,7 +393,6 @@
         }
       }
 
-      // Бейдж
       const badge = document.getElementById('cart-badge');
       if (totalCount > 0) {
         badge.textContent = totalCount;
@@ -404,7 +401,6 @@
         badge.classList.add('hidden');
       }
 
-      // Плавающая плашка снизу
       const floatCart = document.getElementById('floatingCart');
       if (totalCount > 0) {
         floatCart.classList.remove('hidden');
@@ -414,8 +410,6 @@
         floatCart.classList.add('hidden');
       }
 
-      // Прогресс бесплатной доставки
-      const progressBox = document.getElementById('deliveryProgressBox');
       const progressText = document.getElementById('deliveryProgressText');
       const progressBar = document.getElementById('deliveryProgressBar');
       const deliveryLabel = document.getElementById('deliveryCostLabel');
@@ -423,14 +417,13 @@
       if (totalPrice >= FREE_DELIVERY_THRESHOLD) {
         progressText.innerHTML = `<span class="text-[#3F5E4D] font-bold">🎉 Доставка по Еревану бесплатная!</span>`;
         progressBar.style.width = '100%';
-        progressBar.className = "bg-[#3F5E4D] h-full transition-all duration-300";
         deliveryLabel.innerHTML = `<span class="text-[#3F5E4D] font-bold">Бесплатно</span>`;
       } else {
         const diff = FREE_DELIVERY_THRESHOLD - totalPrice;
         const percent = Math.min(100, Math.round((totalPrice / FREE_DELIVERY_THRESHOLD) * 100));
         progressText.innerHTML = `До бесплатной доставки: <b>${diff.toLocaleString()} ֏</b>`;
         progressBar.style.width = `${percent}%`;
-        deliveryLabel.textContent = "По тарифу такси/курьера";
+        deliveryLabel.textContent = "По тарифу службы доставки";
       }
 
       renderCartItems(totalPrice);
@@ -473,7 +466,8 @@
       modal.classList.toggle('hidden');
     }
 
-    function submitOrder() {
+    // НАЖАТИЕ КНОПКИ ОФОРМИТЬ ЗАКАЗ
+    async function submitOrder() {
       const keys = Object.keys(cart);
       if (keys.length === 0) {
         alert("Пожалуйста, добавьте блюда в заказ!");
@@ -486,7 +480,7 @@
       const comment = document.getElementById('custComment').value.trim();
 
       if (!name || !phone) {
-        alert("Пожалуйста, заполните имя и контактный телефон!");
+        alert("Пожалуйста, укажите имя и телефон для связи!");
         return;
       }
 
@@ -502,41 +496,60 @@
 
       const isFreeDelivery = total >= FREE_DELIVERY_THRESHOLD;
 
-      const payload = {
-        name,
-        phone,
-        address: address || "Самовывоз / Уточнить",
-        comment: comment || "-",
-        items: orderItems,
-        total: total,
-        isFreeDelivery: isFreeDelivery
-      };
+      let msg = `🔔 <b>НОВЫЙ ЗАКАЗ В BNAKAN TNAKAN!</b>\n`;
+      msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+      msg += `👤 <b>Клиент:</b> ${name}\n`;
+      msg += `📞 <b>Телефон:</b> ${phone}\n`;
+      msg += `📍 <b>Адрес:</b> ${address || "Самовывоз / Уточнить"}\n`;
+      if (comment) msg += `💬 <b>Пожелания:</b> ${comment}\n`;
+      msg += `📦 <b>Доставка:</b> ${isFreeDelivery ? 'Бесплатная (заказ от 15 000 ֏) 🎉' : 'По тарифу курьера / такси'}\n`;
+      msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+      msg += `<b>📋 Состав заказа:</b>\n\n`;
 
-      // Если в Telegram WebApp
-      if (window.Telegram?.WebApp && window.Telegram.WebApp.sendData) {
-        try {
-          window.Telegram.WebApp.sendData(JSON.stringify(payload));
-          return;
-        } catch (e) {
-          console.log(e);
-        }
-      }
-
-      // Отправка в чат Telegram @BnakanTnakan
-      let orderMsg = `🛒 *Новый заказ в Bnakan Tnakan*\n`;
-      orderMsg += `👤 *Имя:* ${payload.name}\n`;
-      orderMsg += `📞 *Телефон:* ${payload.phone}\n`;
-      orderMsg += `📍 *Адрес:* ${payload.address}\n`;
-      if (payload.comment !== "-") orderMsg += `💬 *Комментарий:* ${payload.comment}\n`;
-      orderMsg += `🚗 *Доставка:* ${isFreeDelivery ? 'Бесплатная (акция от 15 000 ֏) 🎉' : 'По тарифу курьера / самовывоз'}\n`;
-      orderMsg += `\n*Состав заказа:*\n`;
-      payload.items.forEach(i => {
-        orderMsg += `• ${i.name} — ${i.count} шт/кг (${i.sum.toLocaleString()} ֏)\n`;
+      orderItems.forEach(i => {
+        msg += `▫️ ${i.name} × <b>${i.count}</b> = ${i.sum.toLocaleString()} ֏\n`;
       });
-      orderMsg += `\n*Итого к оплате:* ${payload.total.toLocaleString()} ֏`;
 
-      const tgUrl = `https://t.me/BnakanTnakan?text=${encodeURIComponent(orderMsg)}`;
-      window.open(tgUrl, '_blank');
+      msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+      msg += `💰 <b>ИТОГО: ${total.toLocaleString()} ֏</b>`;
+
+      // НАСТРОЙКИ ОТПРАВКИ
+      const BOT_TOKEN = "8885685960:AAHNQjrUL8Em-zcpY4UQUb4Q5gGBK3EN_rU";
+      const ADMIN_CHAT_ID = "5637879658"; //
+
+      const btn = document.getElementById('submitBtn');
+      const btnText = document.getElementById('btnText');
+      btn.disabled = true;
+      btnText.innerText = "Отправка...";
+
+      try {
+        const resp = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: ADMIN_CHAT_ID,
+            text: msg,
+            parse_mode: 'HTML'
+          })
+        });
+
+        if (resp.ok) {
+          alert("Спасибо! Заказ успешно отправлен. Скоро свяжемся с вами.");
+          cart = {};
+          updateCartUI();
+          toggleCart();
+          if (window.Telegram?.WebApp) {
+            window.Telegram.WebApp.close();
+          }
+        } else {
+          alert("Не удалось отправить заказ через бота. Проверьте ID получателя.");
+        }
+      } catch (e) {
+        alert("Ошибка сети. Попробуйте еще раз.");
+      } finally {
+        btn.disabled = false;
+        btnText.innerText = "Оформить заказ";
+      }
     }
 
     init();
